@@ -59,6 +59,10 @@ The application will be available at `http://localhost:8080`
 - GET `/api/cards/user/{userId}` - Get user's cards
 - GET `/api/cards/{id}` - Get card details
 
+### Transactions
+- POST `/api/transactions/transfer` - Transfer money between accounts
+- GET `/api/transactions/user/{userId}` - Get user's transaction history
+
 ## Security
 
 The API uses JWT (JSON Web Tokens) for authentication. Include the token in the Authorization header:
