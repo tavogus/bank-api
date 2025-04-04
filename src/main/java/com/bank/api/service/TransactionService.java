@@ -1,5 +1,8 @@
 package com.bank.api.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,6 +12,7 @@ import com.bank.api.entity.Account;
 import com.bank.api.entity.Transaction;
 import com.bank.api.entity.TransactionStatus;
 import com.bank.api.entity.TransactionType;
+import com.bank.api.entity.User;
 import com.bank.api.exception.BusinessException;
 import com.bank.api.repository.AccountRepository;
 import com.bank.api.repository.TransactionRepository;
@@ -18,10 +22,12 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
+    private final UserService userService;
 
-    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository) {
+    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository, UserService userService) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
+        this.userService = userService;
     }
 
     @Transactional
@@ -66,6 +72,24 @@ public class TransactionService {
             transactionRepository.save(transaction);
             throw new BusinessException("Transaction failed: " + e.getMessage());
         }
+    }
+
+    public List<TransactionResponseDTO> getTransactionsByUserId(Long userId) {
+        User user = userService.getUserById(userId);
+        if (user == null) {
+            throw new BusinessException("User not found");
+        }
+        
+        Account account = user.getAccount();
+        if (account == null) {
+            throw new BusinessException("User has no associated account");
+        }
+        
+        List<Transaction> transactions = transactionRepository.findAllTransactionsByAccount(account);
+        
+        return transactions.stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
     }
 
     private TransactionResponseDTO mapToResponseDTO(Transaction transaction) {
