@@ -1,7 +1,5 @@
 package com.bank.api.config;
 
-import com.bank.api.security.jwt.JwtConfigurer;
-import com.bank.api.security.jwt.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,6 +9,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+
+import com.bank.api.security.jwt.JwtConfigurer;
+import com.bank.api.security.jwt.JwtTokenProvider;
 
 @Configuration
 @EnableWebSecurity
@@ -32,7 +33,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/**").permitAll()
                         .anyRequest().authenticated()
-                ).apply(new JwtConfigurer(tokenProvider));
+                )
+                .with(new JwtConfigurer(tokenProvider), configurer -> {});
 
         return http.build();
     }
