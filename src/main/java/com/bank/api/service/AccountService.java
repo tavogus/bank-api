@@ -4,6 +4,8 @@ import com.bank.api.dto.AccountDTO;
 import com.bank.api.entity.Account;
 import com.bank.api.entity.User;
 import com.bank.api.repository.AccountRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

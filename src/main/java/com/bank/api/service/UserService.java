@@ -1,16 +1,15 @@
 package com.bank.api.service;
 
-import com.bank.api.dto.UserDTO;
-import com.bank.api.dto.UserRegistrationDTO;
-import com.bank.api.entity.User;
-import com.bank.api.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import com.bank.api.dto.UserDTO;
+import com.bank.api.dto.UserRegistrationDTO;
+import com.bank.api.entity.User;
+import com.bank.api.repository.UserRepository;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -21,18 +20,6 @@ public class UserService implements UserDetailsService {
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                new ArrayList<>()
-        );
     }
 
     public UserDTO createUser(UserRegistrationDTO userRegistrationDTO) {
@@ -50,6 +37,10 @@ public class UserService implements UserDetailsService {
         user.setFullName(userRegistrationDTO.fullName());
         user.setCpf(userRegistrationDTO.cpf());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setAccountNonExpired(true);
+        user.setAccountNonLocked(true);
+        user.setCredentialsNonExpired(true);
+        user.setEnabled(true);
 
         user = userRepository.save(user);
         return new UserDTO(
@@ -68,5 +59,11 @@ public class UserService implements UserDetailsService {
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 } 

@@ -1,4 +1,11 @@
+security:
+  jwt:
+    token:
+      secret-key: 53cr37
+      expire-length: 3600000
 spring:
+  main:
+    allow-circular-references: true
   datasource:
     url: jdbc:postgresql://localhost:5432/bankdb
     username: bankuser
@@ -15,7 +22,3 @@ spring:
 
 server:
   port: 8080
-
-jwt:
-  secret: QE635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-  expiration: 86400000 # 24 hours in milliseconds 

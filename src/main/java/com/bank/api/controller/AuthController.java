@@ -2,31 +2,26 @@ package com.bank.api.controller;
 
 import com.bank.api.dto.UserDTO;
 import com.bank.api.dto.UserRegistrationDTO;
-import com.bank.api.security.JwtUtil;
+import com.bank.api.dto.security.AccountCredentialsDTO;
+import com.bank.api.service.AuthService;
 import com.bank.api.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
     private final UserService userService;
-    private final JwtUtil jwtUtil;
+    private final AuthService authService;
 
-    public AuthController(AuthenticationManager authenticationManager, UserService userService, JwtUtil jwtUtil) {
-        this.authenticationManager = authenticationManager;
+    public AuthController(UserService userService, AuthService authService) {
         this.userService = userService;
-        this.jwtUtil = jwtUtil;
+        this.authService = authService;
     }
 
     @PostMapping("/register")
@@ -35,19 +30,16 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
-        authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                loginRequest.get("email"),
-                loginRequest.get("password")
-            )
-        );
+    public ResponseEntity<?> login(@RequestBody AccountCredentialsDTO data) {
+        if (checkIfParamsIsNotNull(data))
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid client request!");
+        var token = authService.signin(data);
+        if (token == null) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid client request!");
+        return token;
+    }
 
-        String jwt = jwtUtil.generateToken(userService.loadUserByUsername(loginRequest.get("email")));
-        
-        Map<String, String> response = new HashMap<>();
-        response.put("token", jwt);
-        
-        return ResponseEntity.ok(response);
+    private boolean checkIfParamsIsNotNull(AccountCredentialsDTO data) {
+        return data == null || data.getUsername() == null || data.getUsername().isBlank()
+                || data.getPassword() == null || data.getPassword().isBlank();
     }
 } 
