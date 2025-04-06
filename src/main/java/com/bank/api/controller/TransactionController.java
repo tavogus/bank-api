@@ -31,8 +31,8 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.transfer(request));
     }
     
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<TransactionResponseDTO>> getUserTransactions(@PathVariable Long userId) {
-        return ResponseEntity.ok(transactionService.getTransactionsByUserId(userId));
+    @GetMapping("/user")
+    public ResponseEntity<List<TransactionResponseDTO>> getUserTransactions() {
+        return ResponseEntity.ok(transactionService.getTransactionsByUserId());
     }
 } 

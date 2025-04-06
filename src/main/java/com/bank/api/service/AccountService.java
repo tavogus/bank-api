@@ -1,16 +1,15 @@
 package com.bank.api.service;
 
+import java.math.BigDecimal;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.bank.api.dto.AccountDTO;
 import com.bank.api.entity.Account;
 import com.bank.api.entity.User;
 import com.bank.api.repository.AccountRepository;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.util.UUID;
 
 @Service
 public class AccountService {
@@ -117,6 +116,11 @@ public class AccountService {
                 account.getCreatedAt(),
                 account.getUpdatedAt()
         );
+    }
+
+    public Account findByUsername(String username) {
+        return accountRepository.findByUserUsername(username)
+                .orElseThrow(() -> new RuntimeException("Account not found for user: " + username));
     }
 
     private String generateAccountNumber() {

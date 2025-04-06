@@ -1,21 +1,19 @@
 package com.bank.api.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.bank.api.dto.TransactionRequestDTO;
 import com.bank.api.dto.TransactionResponseDTO;
 import com.bank.api.entity.Account;
 import com.bank.api.entity.Transaction;
 import com.bank.api.entity.TransactionStatus;
 import com.bank.api.entity.TransactionType;
-import com.bank.api.entity.User;
 import com.bank.api.exception.BusinessException;
 import com.bank.api.repository.AccountRepository;
 import com.bank.api.repository.TransactionRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TransactionService {
@@ -23,11 +21,13 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
     private final UserService userService;
+    private final UserContextService userContextService;
 
-    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository, UserService userService) {
+    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository, UserService userService, UserContextService userContextService) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.userService = userService;
+        this.userContextService = userContextService;
     }
 
     @Transactional
@@ -74,13 +74,8 @@ public class TransactionService {
         }
     }
 
-    public List<TransactionResponseDTO> getTransactionsByUserId(Long userId) {
-        User user = userService.getUserById(userId);
-        if (user == null) {
-            throw new BusinessException("User not found");
-        }
-        
-        Account account = user.getAccount();
+    public List<TransactionResponseDTO> getTransactionsByUserId() {
+        Account account = userContextService.getCurrentUserAccount();
         if (account == null) {
             throw new BusinessException("User has no associated account");
         }
