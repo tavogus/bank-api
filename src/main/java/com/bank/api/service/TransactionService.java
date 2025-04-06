@@ -20,13 +20,11 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
-    private final UserService userService;
     private final UserContextService userContextService;
 
-    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository, UserService userService, UserContextService userContextService) {
+    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository, UserContextService userContextService) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
-        this.userService = userService;
         this.userContextService = userContextService;
     }
 
