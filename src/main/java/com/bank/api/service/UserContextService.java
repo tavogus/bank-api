@@ -1,21 +1,16 @@
 package com.bank.api.service;
 
+import com.bank.api.entity.User;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
 
-import com.bank.api.entity.Account;
-
-@Service
 public class UserContextService {
-    
-    private final AccountService accountService;
-    
-    public UserContextService(AccountService accountService) {
-        this.accountService = accountService;
-    }
-    
-    public Account getCurrentUserAccount() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return accountService.findByUsername(username);
+
+    public static User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return null;
+        }
+        return (User) auth.getPrincipal();
     }
 } 

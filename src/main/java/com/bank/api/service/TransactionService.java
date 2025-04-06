@@ -2,10 +2,7 @@ package com.bank.api.service;
 
 import com.bank.api.dto.TransactionRequestDTO;
 import com.bank.api.dto.TransactionResponseDTO;
-import com.bank.api.entity.Account;
-import com.bank.api.entity.Transaction;
-import com.bank.api.entity.TransactionStatus;
-import com.bank.api.entity.TransactionType;
+import com.bank.api.entity.*;
 import com.bank.api.exception.BusinessException;
 import com.bank.api.repository.AccountRepository;
 import com.bank.api.repository.TransactionRepository;
@@ -20,18 +17,16 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
-    private final UserContextService userContextService;
 
-    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository, UserContextService userContextService) {
+    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
-        this.userContextService = userContextService;
     }
 
     @Transactional
     public TransactionResponseDTO transfer(TransactionRequestDTO request) {
         // Find accounts
-        Account sourceAccount = userContextService.getCurrentUserAccount();
+        Account sourceAccount = getAccount();
         
         Account destinationAccount = accountRepository.findByAccountNumber(request.getDestinationAccountNumber())
                 .orElseThrow(() -> new BusinessException("Destination account not found"));
@@ -72,7 +67,7 @@ public class TransactionService {
     }
 
     public List<TransactionResponseDTO> getTransactionsByUserId() {
-        Account account = userContextService.getCurrentUserAccount();
+        Account account = getAccount();
         if (account == null) {
             throw new BusinessException("User has no associated account");
         }
@@ -85,15 +80,22 @@ public class TransactionService {
     }
 
     private TransactionResponseDTO mapToResponseDTO(Transaction transaction) {
-        TransactionResponseDTO response = new TransactionResponseDTO();
-        response.setId(transaction.getId());
-        response.setSourceAccountNumber(transaction.getSourceAccount().getAccountNumber());
-        response.setDestinationAccountNumber(transaction.getDestinationAccount().getAccountNumber());
-        response.setAmount(transaction.getAmount());
-        response.setStatus(transaction.getStatus());
-        response.setType(transaction.getType());
-        response.setDescription(transaction.getDescription());
-        response.setCreatedAt(transaction.getCreatedAt());
-        return response;
+        return new TransactionResponseDTO(
+                transaction.getId(),
+                transaction.getSourceAccount().getAccountNumber(),
+                transaction.getDestinationAccount().getAccountNumber(),
+                transaction.getAmount(),
+                transaction.getStatus(),
+                transaction.getType(),
+                transaction.getDescription(),
+                transaction.getCreatedAt());
+    }
+
+    private static Account getAccount() {
+        User user = UserContextService.getCurrentUser();
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        return user.getAccount();
     }
 } 

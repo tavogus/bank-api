@@ -1,15 +1,14 @@
 package com.bank.api.service;
 
+import com.bank.api.dto.UserDTO;
+import com.bank.api.dto.UserRegistrationDTO;
+import com.bank.api.entity.User;
+import com.bank.api.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import com.bank.api.dto.UserDTO;
-import com.bank.api.dto.UserRegistrationDTO;
-import com.bank.api.entity.User;
-import com.bank.api.repository.UserRepository;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -49,11 +48,6 @@ public class UserService implements UserDetailsService {
                 user.getFullName(),
                 user.getCpf()
         );
-    }
-
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     public User getUserByEmail(String email) {

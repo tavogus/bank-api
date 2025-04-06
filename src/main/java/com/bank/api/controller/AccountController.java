@@ -16,32 +16,25 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    @PostMapping("/{userId}")
-    public ResponseEntity<AccountDTO> createAccount(@PathVariable Long userId) {
-        return ResponseEntity.ok(accountService.createAccount(userId));
+    @PostMapping
+    public ResponseEntity<AccountDTO> createAccount() {
+        return ResponseEntity.ok(accountService.createAccount());
     }
 
-    @PostMapping("/{accountId}/deposit")
+    @PostMapping("/deposit")
     public ResponseEntity<AccountDTO> deposit(
-            @PathVariable Long accountId,
             @RequestBody AccountOperationDTO operation) {
-        return ResponseEntity.ok(accountService.deposit(accountId, operation.amount()));
+        return ResponseEntity.ok(accountService.deposit(operation.amount()));
     }
 
-    @PostMapping("/{accountId}/withdraw")
+    @PostMapping("/withdraw")
     public ResponseEntity<AccountDTO> withdraw(
-            @PathVariable Long accountId,
             @RequestBody AccountOperationDTO operation) {
-        return ResponseEntity.ok(accountService.withdraw(accountId, operation.amount()));
+        return ResponseEntity.ok(accountService.withdraw(operation.amount()));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<AccountDTO> getAccount(@PathVariable Long id) {
-        return ResponseEntity.ok(accountService.getAccountById(id));
-    }
-
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<AccountDTO> getAccountByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(accountService.getAccountByUserId(userId));
+    @GetMapping("/user")
+    public ResponseEntity<AccountDTO> getAccountByUserId() {
+        return ResponseEntity.ok(accountService.getAccountByUserId());
     }
 } 

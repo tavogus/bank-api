@@ -18,16 +18,15 @@ public class CardController {
         this.cardService = cardService;
     }
 
-    @PostMapping("/{userId}")
+    @PostMapping
     public ResponseEntity<CardDTO> createCard(
-            @PathVariable Long userId,
             @RequestBody CardCreationDTO creationDTO) {
-        return ResponseEntity.ok(cardService.createCard(userId, creationDTO.cardHolderName()));
+        return ResponseEntity.ok(cardService.createCard(creationDTO.cardHolderName()));
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<CardDTO>> getCardsByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(cardService.getCardsByUserId(userId));
+    @GetMapping("/user")
+    public ResponseEntity<List<CardDTO>> getCardsByUserId() {
+        return ResponseEntity.ok(cardService.getCardsByUserId());
     }
 
     @GetMapping("/{id}")

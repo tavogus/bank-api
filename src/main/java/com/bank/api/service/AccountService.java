@@ -1,32 +1,33 @@
 package com.bank.api.service;
 
-import java.math.BigDecimal;
-import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.bank.api.dto.AccountDTO;
 import com.bank.api.entity.Account;
 import com.bank.api.entity.User;
 import com.bank.api.repository.AccountRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.UUID;
 
 @Service
 public class AccountService {
 
     private final AccountRepository accountRepository;
-    private final UserService userService;
 
-    public AccountService(AccountRepository accountRepository, UserService userService) {
+    public AccountService(AccountRepository accountRepository) {
         this.accountRepository = accountRepository;
-        this.userService = userService;
     }
 
     @Transactional
-    public AccountDTO createAccount(Long userId) {
-        User user = userService.getUserById(userId);
+    public AccountDTO createAccount() {
+        User user = UserContextService.getCurrentUser();
+
+        if (user == null) {
+            return null;
+        }
         
-        if (accountRepository.findByUserId(userId).isPresent()) {
+        if (accountRepository.findByUserId(user.getId()).isPresent()) {
             throw new RuntimeException("User already has an account");
         }
 
@@ -47,13 +48,12 @@ public class AccountService {
     }
 
     @Transactional
-    public AccountDTO deposit(Long accountId, BigDecimal amount) {
+    public AccountDTO deposit(BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("Deposit amount must be positive");
         }
 
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+        Account account = getAccount();
 
         account.setBalance(account.getBalance().add(amount));
         account = accountRepository.save(account);
@@ -68,13 +68,12 @@ public class AccountService {
     }
 
     @Transactional
-    public AccountDTO withdraw(Long accountId, BigDecimal amount) {
+    public AccountDTO withdraw(BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("Withdrawal amount must be positive");
         }
 
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+        Account account = getAccount();
 
         if (account.getBalance().compareTo(amount) < 0) {
             throw new RuntimeException("Insufficient funds");
@@ -92,9 +91,8 @@ public class AccountService {
         );
     }
 
-    public AccountDTO getAccountById(Long id) {
-        Account account = accountRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+    public AccountDTO getAccountByUserId() {
+        Account account = getAccount();
         return new AccountDTO(
                 account.getId(),
                 account.getAccountNumber(),
@@ -105,22 +103,12 @@ public class AccountService {
         );
     }
 
-    public AccountDTO getAccountByUserId(Long userId) {
-        Account account = accountRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
-        return new AccountDTO(
-                account.getId(),
-                account.getAccountNumber(),
-                account.getBalance(),
-                account.getUser().getId(),
-                account.getCreatedAt(),
-                account.getUpdatedAt()
-        );
-    }
-
-    public Account findByUsername(String username) {
-        return accountRepository.findByUserUsername(username)
-                .orElseThrow(() -> new RuntimeException("Account not found for user: " + username));
+    private static Account getAccount() {
+        User user = UserContextService.getCurrentUser();
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        return user.getAccount();
     }
 
     private String generateAccountNumber() {

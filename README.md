@@ -48,15 +48,14 @@ The application will be available at `http://localhost:8080`
 - POST `/api/auth/login` - Login and get JWT token
 
 ### Accounts
-- POST `/api/accounts/{userId}` - Create a new account
-- POST `/api/accounts/{accountId}/deposit` - Deposit money
-- POST `/api/accounts/{accountId}/withdraw` - Withdraw money
-- GET `/api/accounts/{id}` - Get account details
-- GET `/api/accounts/user/{userId}` - Get account by user ID
+- POST `/api/accounts` - Create a new account
+- POST `/api/accounts/deposit` - Deposit money
+- POST `/api/accounts/withdraw` - Withdraw money
+- GET `/api/accounts/user` - Get account by user ID
 
 ### Cards
-- POST `/api/cards/{userId}` - Create a new card
-- GET `/api/cards/user/{userId}` - Get user's cards
+- POST `/api/cards` - Create a new card
+- GET `/api/cards/user` - Get user's cards
 - GET `/api/cards/{id}` - Get card details
 
 ### Transactions

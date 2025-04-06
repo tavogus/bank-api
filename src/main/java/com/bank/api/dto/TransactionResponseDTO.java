@@ -16,6 +16,20 @@ public class TransactionResponseDTO {
     private String description;
     private LocalDateTime createdAt;
 
+    public TransactionResponseDTO() {
+    }
+
+    public TransactionResponseDTO(Long id, String sourceAccountNumber, String destinationAccountNumber, BigDecimal amount, TransactionStatus status, TransactionType type, String description, LocalDateTime createdAt) {
+        this.id = id;
+        this.sourceAccountNumber = sourceAccountNumber;
+        this.destinationAccountNumber = destinationAccountNumber;
+        this.amount = amount;
+        this.status = status;
+        this.type = type;
+        this.description = description;
+        this.createdAt = createdAt;
+    }
+
     public Long getId() {
         return id;
     }

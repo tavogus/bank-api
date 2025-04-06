@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -16,16 +17,14 @@ import java.util.stream.Collectors;
 public class CardService {
 
     private final CardRepository cardRepository;
-    private final UserService userService;
 
-    public CardService(CardRepository cardRepository, UserService userService) {
+    public CardService(CardRepository cardRepository) {
         this.cardRepository = cardRepository;
-        this.userService = userService;
     }
 
     @Transactional
-    public CardDTO createCard(Long userId, String cardHolderName) {
-        User user = userService.getUserById(userId);
+    public CardDTO createCard(String cardHolderName) {
+        User user = UserContextService.getCurrentUser();
 
         Card card = new Card();
         card.setUser(user);
@@ -46,8 +45,13 @@ public class CardService {
         );
     }
 
-    public List<CardDTO> getCardsByUserId(Long userId) {
-        List<Card> cards = cardRepository.findByUserId(userId);
+    public List<CardDTO> getCardsByUserId() {
+        User user = UserContextService.getCurrentUser();
+
+        if (user == null) {
+            return new ArrayList<>();
+        }
+        List<Card> cards = cardRepository.findByUserId(user.getId());
         return cards.stream()
                 .map(card -> new CardDTO(
                         card.getId(),

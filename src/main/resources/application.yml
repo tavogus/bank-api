@@ -4,8 +4,6 @@ security:
       secret-key: 53cr37
       expire-length: 3600000
 spring:
-  main:
-    allow-circular-references: true
   datasource:
     url: jdbc:postgresql://localhost:5432/bankdb
     username: bankuser
