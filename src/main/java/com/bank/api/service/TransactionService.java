@@ -31,8 +31,7 @@ public class TransactionService {
     @Transactional
     public TransactionResponseDTO transfer(TransactionRequestDTO request) {
         // Find accounts
-        Account sourceAccount = accountRepository.findByAccountNumber(request.getSourceAccountNumber())
-                .orElseThrow(() -> new BusinessException("Source account not found"));
+        Account sourceAccount = userContextService.getCurrentUserAccount();
         
         Account destinationAccount = accountRepository.findByAccountNumber(request.getDestinationAccountNumber())
                 .orElseThrow(() -> new BusinessException("Destination account not found"));

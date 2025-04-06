@@ -61,7 +61,7 @@ The application will be available at `http://localhost:8080`
 
 ### Transactions
 - POST `/api/transactions/transfer` - Transfer money between accounts
-- GET `/api/transactions/user/{userId}` - Get user's transaction history
+- GET `/api/transactions/user` - Get logged user transaction history
 
 ## Security
 
