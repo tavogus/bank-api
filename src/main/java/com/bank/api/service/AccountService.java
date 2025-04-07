@@ -1,14 +1,16 @@
 package com.bank.api.service;
 
+import java.math.BigDecimal;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.bank.api.dto.AccountDTO;
 import com.bank.api.entity.Account;
 import com.bank.api.entity.User;
 import com.bank.api.repository.AccountRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.util.UUID;
 
 @Service
 public class AccountService {
@@ -22,11 +24,9 @@ public class AccountService {
     @Transactional
     public AccountDTO createAccount() {
         User user = UserContextService.getCurrentUser();
-
         if (user == null) {
-            return null;
+            throw new RuntimeException("User not found");
         }
-        
         if (accountRepository.findByUserId(user.getId()).isPresent()) {
             throw new RuntimeException("User already has an account");
         }
@@ -75,9 +75,7 @@ public class AccountService {
 
         Account account = getAccount();
 
-        if (account.getBalance().compareTo(amount) < 0) {
-            throw new RuntimeException("Insufficient funds");
-        }
+        validateBalance(account, amount);
 
         account.setBalance(account.getBalance().subtract(amount));
         account = accountRepository.save(account);
@@ -103,6 +101,20 @@ public class AccountService {
         );
     }
 
+    public Optional<Account> findByAccountNumber(String accountNumber) {
+        return accountRepository.findByAccountNumber(accountNumber);
+    }
+
+    public void validateBalance(Account account, BigDecimal amount) {
+        if (account.getBalance().compareTo(amount) < 0) {
+            throw new RuntimeException("Insufficient balance");
+        }
+    }
+
+    public void save(Account account) {
+        accountRepository.save(account);
+    }
+
     private static Account getAccount() {
         User user = UserContextService.getCurrentUser();
         if (user == null) {
@@ -118,4 +130,4 @@ public class AccountService {
         } while (accountRepository.existsByAccountNumber(accountNumber));
         return accountNumber;
     }
-} 
+}

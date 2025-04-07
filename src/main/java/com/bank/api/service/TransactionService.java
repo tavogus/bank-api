@@ -1,26 +1,34 @@
 package com.bank.api.service;
 
-import com.bank.api.dto.TransactionRequestDTO;
-import com.bank.api.dto.TransactionResponseDTO;
-import com.bank.api.entity.*;
-import com.bank.api.exception.BusinessException;
-import com.bank.api.repository.AccountRepository;
-import com.bank.api.repository.TransactionRepository;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.bank.api.dto.TransactionRequestDTO;
+import com.bank.api.dto.TransactionResponseDTO;
+import com.bank.api.entity.Account;
+import com.bank.api.entity.Transaction;
+import com.bank.api.entity.TransactionStatus;
+import com.bank.api.entity.TransactionType;
+import com.bank.api.entity.User;
+import com.bank.api.exception.BusinessException;
+import com.bank.api.repository.AccountRepository;
+import com.bank.api.repository.CardRepository;
+import com.bank.api.repository.TransactionRepository;
 
 @Service
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
-    private final AccountRepository accountRepository;
+    private final AccountService accountService;
 
-    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository) {
+    public TransactionService(TransactionRepository transactionRepository, 
+                            AccountService accountService) {
         this.transactionRepository = transactionRepository;
-        this.accountRepository = accountRepository;
+        this.accountService = accountService;
     }
 
     @Transactional
@@ -28,13 +36,11 @@ public class TransactionService {
         // Find accounts
         Account sourceAccount = getAccount();
         
-        Account destinationAccount = accountRepository.findByAccountNumber(request.getDestinationAccountNumber())
+        Account destinationAccount = accountService.findByAccountNumber(request.getDestinationAccountNumber())
                 .orElseThrow(() -> new BusinessException("Destination account not found"));
 
-        // Validate balance
-        if (sourceAccount.getBalance().compareTo(request.getAmount()) < 0) {
-            throw new BusinessException("Insufficient balance");
-        }
+
+        accountService.validateBalance(sourceAccount, request.getAmount());
 
         // Create transaction
         Transaction transaction = new Transaction();
@@ -51,8 +57,8 @@ public class TransactionService {
             destinationAccount.setBalance(destinationAccount.getBalance().add(request.getAmount()));
 
             // Save accounts
-            accountRepository.save(sourceAccount);
-            accountRepository.save(destinationAccount);
+            accountService.save(sourceAccount);
+            accountService.save(destinationAccount);
 
             // Update transaction status
             transaction.setStatus(TransactionStatus.COMPLETED);
@@ -77,6 +83,32 @@ public class TransactionService {
         return transactions.stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public TransactionResponseDTO createCreditCardTransaction(Account account, BigDecimal amount, String description) {
+
+        Transaction transaction = new Transaction();
+        transaction.setSourceAccount(account);
+        transaction.setDestinationAccount(account);
+        transaction.setAmount(amount);
+        transaction.setType(TransactionType.CREDIT_CARD);
+        transaction.setStatus(TransactionStatus.PENDING);
+        transaction.setDescription(description);
+
+        try {
+            account.setBalance(account.getBalance().subtract(amount));
+            accountService.save(account);
+
+            transaction.setStatus(TransactionStatus.COMPLETED);
+            transaction = transactionRepository.save(transaction);
+
+            return mapToResponseDTO(transaction);
+        } catch (Exception e) {
+            transaction.setStatus(TransactionStatus.FAILED);
+            transactionRepository.save(transaction);
+            throw new BusinessException("Card purchase failed: " + e.getMessage());
+        }
     }
 
     private TransactionResponseDTO mapToResponseDTO(Transaction transaction) {

@@ -1,25 +1,35 @@
 package com.bank.api.service;
 
-import com.bank.api.dto.CardDTO;
-import com.bank.api.entity.Card;
-import com.bank.api.entity.User;
-import com.bank.api.repository.CardRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.bank.api.dto.CardDTO;
+import com.bank.api.dto.CardPurchaseDTO;
+import com.bank.api.dto.TransactionResponseDTO;
+import com.bank.api.entity.Account;
+import com.bank.api.entity.Card;
+import com.bank.api.entity.User;
+import com.bank.api.repository.CardRepository;
+
 @Service
 public class CardService {
 
     private final CardRepository cardRepository;
+    private final TransactionService transactionService;
+    private final AccountService accountService;
 
-    public CardService(CardRepository cardRepository) {
+    public CardService(CardRepository cardRepository, 
+                      TransactionService transactionService,
+                      AccountService accountService) {
         this.cardRepository = cardRepository;
+        this.transactionService = transactionService;
+        this.accountService = accountService;
     }
 
     @Transactional
@@ -76,6 +86,27 @@ public class CardService {
                 card.getUser().getId(),
                 card.getCreatedAt(),
                 card.getUpdatedAt()
+        );
+    }
+
+    @Transactional
+    public TransactionResponseDTO processCardPurchase(CardPurchaseDTO purchaseDTO) {
+        User currentUser = UserContextService.getCurrentUser();
+        
+        Card card = cardRepository.findById(purchaseDTO.cardId())
+                .orElseThrow(() -> new RuntimeException("Card not found"));
+
+        if (!card.getUser().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("Card does not belong to the current user");
+        }
+
+        Account account = currentUser.getAccount();
+        accountService.validateBalance(currentUser.getAccount(), purchaseDTO.amount());
+        
+        return transactionService.createCreditCardTransaction(
+            account,
+            purchaseDTO.amount(),
+            purchaseDTO.description()
         );
     }
 
