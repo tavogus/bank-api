@@ -3,6 +3,7 @@ package com.bank.api.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.bank.api.entity.PaymentType;
 import com.bank.api.entity.TransactionStatus;
 import com.bank.api.entity.TransactionType;
 
@@ -13,19 +14,21 @@ public class TransactionResponseDTO {
     private BigDecimal amount;
     private TransactionStatus status;
     private TransactionType type;
+    private PaymentType paymentType;
     private String description;
     private LocalDateTime createdAt;
 
     public TransactionResponseDTO() {
     }
 
-    public TransactionResponseDTO(Long id, String sourceAccountNumber, String destinationAccountNumber, BigDecimal amount, TransactionStatus status, TransactionType type, String description, LocalDateTime createdAt) {
+    public TransactionResponseDTO(Long id, String sourceAccountNumber, String destinationAccountNumber, BigDecimal amount, TransactionStatus status, TransactionType type, PaymentType paymentType, String description, LocalDateTime createdAt) {
         this.id = id;
         this.sourceAccountNumber = sourceAccountNumber;
         this.destinationAccountNumber = destinationAccountNumber;
         this.amount = amount;
         this.status = status;
         this.type = type;
+        this.paymentType = paymentType;
         this.description = description;
         this.createdAt = createdAt;
     }
@@ -76,6 +79,14 @@ public class TransactionResponseDTO {
 
     public void setType(TransactionType type) {
         this.type = type;
+    }
+
+    public PaymentType getPaymentType() {
+        return paymentType;
+    }
+
+    public void setPaymentType(PaymentType paymentType) {
+        this.paymentType = paymentType;
     }
 
     public String getDescription() {

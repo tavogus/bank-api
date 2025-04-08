@@ -57,10 +57,16 @@ The application will be available at `http://localhost:8080`
 - POST `/api/cards` - Create a new card
 - GET `/api/cards/user` - Get user's cards
 - GET `/api/cards/{id}` - Get card details
+- POST `/api/cards/purchase` - Make a purchase with card
 
 ### Transactions
 - POST `/api/transactions/transfer` - Transfer money between accounts
 - GET `/api/transactions/user` - Get logged user transaction history
+
+### Invoices
+- GET `/api/invoices/card/{cardId}` - Get card invoices
+- POST `/api/invoices/{invoiceId}/pay` - Pay an invoice
+- POST `/api/invoices/{invoiceId}/close` - Close an invoice
 
 ## Security
 

@@ -136,6 +136,7 @@ public class InvoiceService {
             transaction.getAmount(),
             transaction.getStatus(),
             transaction.getType(),
+            transaction.getPaymentType(),
             transaction.getDescription(),
             transaction.getCreatedAt()
         );
