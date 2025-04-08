@@ -33,17 +33,17 @@ public class InvoiceService {
 
     @Transactional
     public Invoice createInvoice(Card card) {
-        // Cria uma nova fatura para o cartão
+        // add new invoice to card
         Invoice invoice = new Invoice();
         invoice.setCard(card);
         invoice.setStatus(InvoiceStatus.OPEN);
         
-        // Define a data de fechamento como dia 5 do próximo mês
+        // set a new closing date like the 5th of next month
         LocalDate today = LocalDate.now();
         LocalDate closingDate = today.withDayOfMonth(5).plusMonths(1);
         invoice.setClosingDate(closingDate);
-        
-        // Define a data de vencimento como dia 15 do próximo mês
+
+        // set a new date of overdue like the 15th of next month
         LocalDate dueDate = today.withDayOfMonth(15).plusMonths(1);
         invoice.setDueDate(dueDate);
         
@@ -59,13 +59,13 @@ public class InvoiceService {
             return;
         }
 
-        // Busca a fatura aberta do cartão ou cria uma nova
+        // find open invoice or create a new one
         Invoice invoice = invoiceRepository.findByCardIdAndStatus(card.getId(), InvoiceStatus.OPEN);
         if (invoice == null) {
             invoice = createInvoice(card);
         }
 
-        // Adiciona a transação à fatura
+        // add transaction to invoice
         transaction.setInvoice(invoice);
         invoice.getTransactions().add(transaction);
         invoice.setTotalAmount(invoice.getTotalAmount().add(transaction.getAmount()));
@@ -85,11 +85,11 @@ public class InvoiceService {
         Account account = invoice.getCard().getUser().getAccount();
         accountService.validateBalance(account, invoice.getTotalAmount());
 
-        // Debita o valor da fatura da conta
+        // debit value from invoice's account
         account.setBalance(account.getBalance().subtract(invoice.getTotalAmount()));
         accountService.save(account);
 
-        // Atualiza o status da fatura
+        // update invoice's status
         invoice.setStatus(InvoiceStatus.PAID);
         invoiceRepository.save(invoice);
     }
@@ -141,7 +141,7 @@ public class InvoiceService {
         );
     }
 
-    // Método para ser executado diariamente para verificar faturas vencidas
+    // method to be excecuted everyday to check overdue invoices
     @Transactional
     public void checkOverdueInvoices() {
         List<Invoice> overdueInvoices = invoiceRepository
