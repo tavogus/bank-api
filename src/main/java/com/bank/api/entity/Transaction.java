@@ -41,11 +41,19 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
+    @Column
+    @Enumerated(EnumType.STRING)
+    private PaymentType paymentType;
+
     @Column(length = 500)
     private String description;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "invoice_id")
+    private Invoice invoice;
 
     @PrePersist
     protected void onCreate() {
@@ -114,5 +122,21 @@ public class Transaction {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Invoice getInvoice() {
+        return invoice;
+    }
+
+    public void setInvoice(Invoice invoice) {
+        this.invoice = invoice;
+    }
+
+    public PaymentType getPaymentType() {
+        return paymentType;
+    }
+
+    public void setPaymentType(PaymentType paymentType) {
+        this.paymentType = paymentType;
     }
 } 
