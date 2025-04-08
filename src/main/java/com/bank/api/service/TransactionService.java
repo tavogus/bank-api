@@ -1,26 +1,16 @@
 package com.bank.api.service;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.bank.api.dto.TransactionRequestDTO;
+import com.bank.api.dto.TransactionResponseDTO;
+import com.bank.api.entity.*;
+import com.bank.api.exception.BusinessException;
+import com.bank.api.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.bank.api.dto.TransactionRequestDTO;
-import com.bank.api.dto.TransactionResponseDTO;
-import com.bank.api.entity.Account;
-import com.bank.api.entity.Card;
-import com.bank.api.entity.Transaction;
-import com.bank.api.entity.TransactionStatus;
-import com.bank.api.entity.TransactionType;
-import com.bank.api.entity.User;
-import com.bank.api.entity.PaymentType;
-import com.bank.api.exception.BusinessException;
-import com.bank.api.repository.AccountRepository;
-import com.bank.api.repository.CardRepository;
-import com.bank.api.repository.TransactionRepository;
-import com.bank.api.repository.InvoiceRepository;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TransactionService {
@@ -108,7 +98,7 @@ public class TransactionService {
                 account.setBalance(account.getBalance().subtract(amount));
                 accountService.save(account);
             } else {
-                // Se for crédito, adiciona à fatura
+                // if credit, add to invoice
                 invoiceService.addTransactionToInvoice(transaction, card);
             }
 
