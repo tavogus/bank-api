@@ -14,6 +14,7 @@ import com.bank.api.dto.CardPurchaseDTO;
 import com.bank.api.dto.TransactionResponseDTO;
 import com.bank.api.entity.Account;
 import com.bank.api.entity.Card;
+import com.bank.api.entity.PaymentType;
 import com.bank.api.entity.User;
 import com.bank.api.repository.CardRepository;
 
@@ -101,12 +102,13 @@ public class CardService {
         }
 
         Account account = currentUser.getAccount();
-        accountService.validateBalance(currentUser.getAccount(), purchaseDTO.amount());
-        
+
         return transactionService.createCreditCardTransaction(
             account,
+            card,
             purchaseDTO.amount(),
-            purchaseDTO.description()
+            purchaseDTO.description(),
+            purchaseDTO.paymentType()
         );
     }
 

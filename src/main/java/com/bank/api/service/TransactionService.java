@@ -10,25 +10,31 @@ import org.springframework.transaction.annotation.Transactional;
 import com.bank.api.dto.TransactionRequestDTO;
 import com.bank.api.dto.TransactionResponseDTO;
 import com.bank.api.entity.Account;
+import com.bank.api.entity.Card;
 import com.bank.api.entity.Transaction;
 import com.bank.api.entity.TransactionStatus;
 import com.bank.api.entity.TransactionType;
 import com.bank.api.entity.User;
+import com.bank.api.entity.PaymentType;
 import com.bank.api.exception.BusinessException;
 import com.bank.api.repository.AccountRepository;
 import com.bank.api.repository.CardRepository;
 import com.bank.api.repository.TransactionRepository;
+import com.bank.api.repository.InvoiceRepository;
 
 @Service
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final AccountService accountService;
+    private final InvoiceService invoiceService;
 
     public TransactionService(TransactionRepository transactionRepository, 
-                            AccountService accountService) {
+                            AccountService accountService,
+                            InvoiceService invoiceService) {
         this.transactionRepository = transactionRepository;
         this.accountService = accountService;
+        this.invoiceService = invoiceService;
     }
 
     @Transactional
@@ -86,19 +92,25 @@ public class TransactionService {
     }
 
     @Transactional
-    public TransactionResponseDTO createCreditCardTransaction(Account account, BigDecimal amount, String description) {
-
+    public TransactionResponseDTO createCreditCardTransaction(Account account, Card card, BigDecimal amount, String description, PaymentType paymentType) {
         Transaction transaction = new Transaction();
         transaction.setSourceAccount(account);
         transaction.setDestinationAccount(account);
         transaction.setAmount(amount);
         transaction.setType(TransactionType.CREDIT_CARD);
+        transaction.setPaymentType(paymentType);
         transaction.setStatus(TransactionStatus.PENDING);
         transaction.setDescription(description);
 
         try {
-            account.setBalance(account.getBalance().subtract(amount));
-            accountService.save(account);
+            if (paymentType == PaymentType.DEBIT) {
+                accountService.validateBalance(account, amount);
+                account.setBalance(account.getBalance().subtract(amount));
+                accountService.save(account);
+            } else {
+                // Se for crédito, adiciona à fatura
+                invoiceService.addTransactionToInvoice(transaction, card);
+            }
 
             transaction.setStatus(TransactionStatus.COMPLETED);
             transaction = transactionRepository.save(transaction);
