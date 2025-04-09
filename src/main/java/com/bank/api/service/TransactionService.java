@@ -32,25 +32,26 @@ public class TransactionService {
         // Find accounts
         Account sourceAccount = getAccount();
         
-        Account destinationAccount = accountService.findByAccountNumber(request.getDestinationAccountNumber())
+        Account destinationAccount = accountService.findByAccountNumber(request.destinationAccountNumber())
                 .orElseThrow(() -> new BusinessException("Destination account not found"));
 
 
-        accountService.validateBalance(sourceAccount, request.getAmount());
+        accountService.validateBalance(sourceAccount, request.amount());
 
         // Create transaction
         Transaction transaction = new Transaction();
         transaction.setSourceAccount(sourceAccount);
         transaction.setDestinationAccount(destinationAccount);
-        transaction.setAmount(request.getAmount());
+        transaction.setAmount(request.amount());
         transaction.setType(TransactionType.TRANSFER);
+        transaction.setPaymentType(PaymentType.TRANSFER);
         transaction.setStatus(TransactionStatus.PENDING);
-        transaction.setDescription(request.getDescription());
+        transaction.setDescription(request.description());
 
         try {
             // Update balances
-            sourceAccount.setBalance(sourceAccount.getBalance().subtract(request.getAmount()));
-            destinationAccount.setBalance(destinationAccount.getBalance().add(request.getAmount()));
+            sourceAccount.setBalance(sourceAccount.getBalance().subtract(request.amount()));
+            destinationAccount.setBalance(destinationAccount.getBalance().add(request.amount()));
 
             // Save accounts
             accountService.save(sourceAccount);
