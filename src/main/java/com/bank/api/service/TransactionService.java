@@ -71,9 +71,6 @@ public class TransactionService {
 
     public List<TransactionResponseDTO> getTransactionsByUserId() {
         Account account = getAccount();
-        if (account == null) {
-            throw new BusinessException("User has no associated account");
-        }
         
         List<Transaction> transactions = transactionRepository.findAllTransactionsByAccount(account);
         
@@ -131,6 +128,9 @@ public class TransactionService {
         User user = UserContextService.getCurrentUser();
         if (user == null) {
             throw new RuntimeException("User not found");
+        }
+        if (user.getAccount() == null) {
+            throw new RuntimeException("Account not found");
         }
         return user.getAccount();
     }

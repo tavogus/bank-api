@@ -110,11 +110,11 @@ public class InvoiceService {
     public List<InvoiceDTO> getCardInvoices(Long cardId) {
         return invoiceRepository.findByCardId(cardId)
                 .stream()
-                .map(this::toDTO)
+                .map(this::toInvooiceDTO)
                 .collect(Collectors.toList());
     }
 
-    private InvoiceDTO toDTO(Invoice invoice) {
+    private InvoiceDTO toInvooiceDTO(Invoice invoice) {
         return new InvoiceDTO(
             invoice.getId(),
             invoice.getCard().getId(),

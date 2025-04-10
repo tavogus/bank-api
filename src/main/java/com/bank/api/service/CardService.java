@@ -1,44 +1,38 @@
 package com.bank.api.service;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.bank.api.dto.CardDTO;
 import com.bank.api.dto.CardPurchaseDTO;
 import com.bank.api.dto.TransactionResponseDTO;
 import com.bank.api.entity.Account;
 import com.bank.api.entity.Card;
-import com.bank.api.entity.PaymentType;
 import com.bank.api.entity.User;
 import com.bank.api.repository.CardRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class CardService {
 
     private final CardRepository cardRepository;
     private final TransactionService transactionService;
-    private final AccountService accountService;
 
     public CardService(CardRepository cardRepository, 
-                      TransactionService transactionService,
-                      AccountService accountService) {
+                      TransactionService transactionService) {
         this.cardRepository = cardRepository;
         this.transactionService = transactionService;
-        this.accountService = accountService;
     }
 
     @Transactional
     public CardDTO createCard(String cardHolderName) {
-        User user = UserContextService.getCurrentUser();
+        User currentUser = UserContextService.getCurrentUser();
 
         Card card = new Card();
-        card.setUser(user);
+        card.setUser(currentUser);
         card.setCardHolderName(cardHolderName);
         card.setCardNumber(generateCardNumber());
         card.setCvv(generateCVV());
@@ -57,11 +51,7 @@ public class CardService {
     }
 
     public List<CardDTO> getCardsByUserId() {
-        User user = UserContextService.getCurrentUser();
-
-        if (user == null) {
-            return new ArrayList<>();
-        }
+        User user = getCurretnUser();
         List<Card> cards = cardRepository.findByUserId(user.getId());
         return cards.stream()
                 .map(card -> new CardDTO(
@@ -92,7 +82,7 @@ public class CardService {
 
     @Transactional
     public TransactionResponseDTO processCardPurchase(CardPurchaseDTO purchaseDTO) {
-        User currentUser = UserContextService.getCurrentUser();
+        User currentUser = getCurretnUser();
         
         Card card = cardRepository.findById(purchaseDTO.cardId())
                 .orElseThrow(() -> new RuntimeException("Card not found"));
@@ -122,5 +112,14 @@ public class CardService {
 
     private String generateCVV() {
         return String.format("%03d", (int) (Math.random() * 1000));
+    }
+
+    private static User getCurretnUser() {
+        User user = UserContextService.getCurrentUser();
+
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        return user;
     }
 } 
