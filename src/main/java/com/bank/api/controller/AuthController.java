@@ -3,9 +3,9 @@ package com.bank.api.controller;
 import com.bank.api.dto.UserDTO;
 import com.bank.api.dto.UserRegistrationDTO;
 import com.bank.api.dto.security.AccountCredentialsDTO;
+import com.bank.api.dto.security.TokenDTO;
 import com.bank.api.service.AuthService;
 import com.bank.api.service.UserService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,16 +30,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AccountCredentialsDTO data) {
-        if (checkIfParamsIsNotNull(data))
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid client request!");
-        var token = authService.signin(data);
-        if (token == null) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid client request!");
-        return token;
-    }
-
-    private boolean checkIfParamsIsNotNull(AccountCredentialsDTO data) {
-        return data == null || data.getUsername() == null || data.getUsername().isBlank()
-                || data.getPassword() == null || data.getPassword().isBlank();
+    public ResponseEntity<TokenDTO> login(@RequestBody AccountCredentialsDTO data) {
+        return ResponseEntity.ok(authService.signin(data));
     }
 } 

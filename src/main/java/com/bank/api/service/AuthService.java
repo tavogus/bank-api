@@ -3,7 +3,6 @@ package com.bank.api.service;
 import com.bank.api.dto.security.AccountCredentialsDTO;
 import com.bank.api.dto.security.TokenDTO;
 import com.bank.api.security.jwt.JwtTokenProvider;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,23 +22,21 @@ public class AuthService {
         this.authenticationManager = authenticationManager;
     }
 
-    @SuppressWarnings("rawtypes")
-    public ResponseEntity signin(AccountCredentialsDTO data) {
+    public TokenDTO signin(AccountCredentialsDTO data) {
         try {
-            var username = data.getUsername();
-            var password = data.getPassword();
+            var username = data.username();
+            var password = data.password();
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(username, password));
 
             var user = userService.getUserByEmail(username);
-
-            var tokenResponse = new TokenDTO();
+            TokenDTO tokenResponse;
             if (user != null) {
                 tokenResponse = tokenProvider.createAccessToken(username, user.getRoles());
             } else {
                 throw new UsernameNotFoundException("Username " + username + " not found!");
             }
-            return ResponseEntity.ok(tokenResponse);
+            return tokenResponse;
         } catch (Exception e) {
             throw new BadCredentialsException("Invalid username/password supplied!");
         }
