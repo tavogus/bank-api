@@ -7,6 +7,7 @@ public record CardDTO(
     String cardNumber,
     String cardHolderName,
     LocalDateTime expirationDate,
+    String cvv,
     Long userId,
     LocalDateTime createdAt,
     LocalDateTime updatedAt

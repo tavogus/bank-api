@@ -2,7 +2,8 @@ CREATE TYPE transaction_type AS ENUM (
   'TRANSFER',
   'DEPOSIT',
   'WITHDRAWAL',
-  'CREDIT_CARD'
+  'CREDIT_CARD',
+  'DEBIT_CARD'
 );
 
 ALTER TABLE transactions

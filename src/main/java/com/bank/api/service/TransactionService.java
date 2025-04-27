@@ -1,16 +1,23 @@
 package com.bank.api.service;
 
-import com.bank.api.dto.TransactionRequestDTO;
-import com.bank.api.dto.TransactionResponseDTO;
-import com.bank.api.entity.*;
-import com.bank.api.exception.BusinessException;
-import com.bank.api.repository.TransactionRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.bank.api.dto.TransactionRequestDTO;
+import com.bank.api.dto.TransactionResponseDTO;
+import com.bank.api.entity.Account;
+import com.bank.api.entity.Card;
+import com.bank.api.entity.PaymentType;
+import com.bank.api.entity.Transaction;
+import com.bank.api.entity.TransactionStatus;
+import com.bank.api.entity.TransactionType;
+import com.bank.api.entity.User;
+import com.bank.api.exception.BusinessException;
+import com.bank.api.repository.TransactionRepository;
 
 @Service
 public class TransactionService {
@@ -85,7 +92,6 @@ public class TransactionService {
         transaction.setSourceAccount(account);
         transaction.setDestinationAccount(account);
         transaction.setAmount(amount);
-        transaction.setType(TransactionType.CREDIT_CARD);
         transaction.setPaymentType(paymentType);
         transaction.setStatus(TransactionStatus.PENDING);
         transaction.setDescription(description);
@@ -95,8 +101,11 @@ public class TransactionService {
                 accountService.validateBalance(account, amount);
                 account.setBalance(account.getBalance().subtract(amount));
                 accountService.save(account);
+
+                transaction.setType(TransactionType.DEBIT_CARD);
             } else {
                 // if credit, add to invoice
+                transaction.setType(TransactionType.CREDIT_CARD);
                 invoiceService.addTransactionToInvoice(transaction, card);
             }
 

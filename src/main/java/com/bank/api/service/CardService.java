@@ -1,5 +1,13 @@
 package com.bank.api.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.bank.api.dto.CardDTO;
 import com.bank.api.dto.CardPurchaseDTO;
 import com.bank.api.dto.TransactionResponseDTO;
@@ -7,13 +15,6 @@ import com.bank.api.entity.Account;
 import com.bank.api.entity.Card;
 import com.bank.api.entity.User;
 import com.bank.api.repository.CardRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class CardService {
@@ -44,6 +45,7 @@ public class CardService {
                 card.getCardNumber(),
                 card.getCardHolderName(),
                 card.getExpirationDate(),
+                card.getCvv(),
                 card.getUser().getId(),
                 card.getCreatedAt(),
                 card.getUpdatedAt()
@@ -59,6 +61,7 @@ public class CardService {
                         card.getCardNumber(),
                         card.getCardHolderName(),
                         card.getExpirationDate(),
+                        card.getCvv(),
                         card.getUser().getId(),
                         card.getCreatedAt(),
                         card.getUpdatedAt()
@@ -74,6 +77,7 @@ public class CardService {
                 card.getCardNumber(),
                 card.getCardHolderName(),
                 card.getExpirationDate(),
+                card.getCvv(),
                 card.getUser().getId(),
                 card.getCreatedAt(),
                 card.getUpdatedAt()
