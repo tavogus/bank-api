@@ -1,9 +1,9 @@
 package com.bank.api.service;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,14 +76,12 @@ public class TransactionService {
         }
     }
 
-    public List<TransactionResponseDTO> getTransactionsByUserId() {
+    public Page<TransactionResponseDTO> getTransactionsByUserId(Pageable pageable) {
         Account account = getAccount();
         
-        List<Transaction> transactions = transactionRepository.findAllTransactionsByAccount(account);
+        Page<Transaction> transactions = transactionRepository.findAllTransactionsByAccount(account, pageable);
         
-        return transactions.stream()
-                .map(this::mapToResponseDTO)
-                .collect(Collectors.toList());
+        return transactions.map(this::mapToResponseDTO);
     }
 
     @Transactional
