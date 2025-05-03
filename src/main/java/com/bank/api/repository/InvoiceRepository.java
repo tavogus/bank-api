@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
-    List<Invoice> findByCardId(Long cardId);
+    List<Invoice> findByCardIdOrderByClosingDateDesc(Long cardId);
     Invoice findByCardIdAndStatus(Long cardId, InvoiceStatus status);
     List<Invoice> findByDueDateBeforeAndStatus(LocalDate date, InvoiceStatus status);
 } 

@@ -108,7 +108,7 @@ public class InvoiceService {
     }
 
     public List<InvoiceDTO> getCardInvoices(Long cardId) {
-        return invoiceRepository.findByCardId(cardId)
+        return invoiceRepository.findByCardIdOrderByClosingDateDesc(cardId)
                 .stream()
                 .map(this::toInvooiceDTO)
                 .collect(Collectors.toList());
